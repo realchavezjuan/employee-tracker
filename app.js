@@ -1,5 +1,7 @@
 const inquirer = require('inquirer');
 const db = require('./db/connection');
+const cTable = require('console.table');
+
 
 const initialPrompt = () => {
 
@@ -28,5 +30,5 @@ const sql = `SELECT * FROM departments`;
 
 db.query(sql, (err, rows) => {
     
-    console.log(rows);
+    console.table(rows);
 });
