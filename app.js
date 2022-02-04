@@ -1,14 +1,21 @@
 const inquirer = require('inquirer');
-const {getDepartments} = require('./src/queries.js');
+const cTable = require('console.table');
+const db = require('./db/connection');
 
+const getDepartments = () => {
+    const sql = `SELECT * FROM departments`;
+
+    db.query(sql, (err, rows) => {
+    console.table(rows);
+    });
+
+    // call initial prompt again after query
+    initialPrompt();
+}
 
 const initialPrompt = () => {
 
-    console.log(`
-    -------------------------------------------------
-    `);
-
-    return inquirer.prompt([ 
+    inquirer.prompt([ 
         {
             type: 'list',
             name: 'request',
@@ -16,6 +23,9 @@ const initialPrompt = () => {
             choices: ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'and update an employee role']
         }
     ]).then(promptData => {
+
+        console.log(`-------------------------------------------------`);
+
         // promptData.request equals the answer from the prompt in a string format
         switch (promptData.request){
             case 'view all departments': 
@@ -41,8 +51,7 @@ const initialPrompt = () => {
             break;
 
         }
-
-    }).then(initialPrompt);
+    });
 };
 
 initialPrompt();
