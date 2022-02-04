@@ -1,4 +1,5 @@
-DROP DATABASE IF EXISTS tracker;
+CREATE TABLE departments (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY, 
+    name VARCHAR(50) NOT NULL
+);
 
-CREATE DATABASE tracker;
-USE tracker;

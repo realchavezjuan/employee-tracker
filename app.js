@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const db = require('./db/connection');
 
 const initialPrompt = () => {
 
@@ -23,4 +24,9 @@ const initialPrompt = () => {
     ]);
 };
 
-initialPrompt();
+const sql = `SELECT * FROM departments`;
+
+db.query(sql, (err, rows) => {
+    
+    console.log(rows);
+});
