@@ -1,5 +1,20 @@
-CREATE TABLE departments (
+CREATE TABLE department (
     id INTEGER AUTO_INCREMENT PRIMARY KEY, 
-    name VARCHAR(50) NOT NULL
+    name VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE role (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY, 
+    title VARCHAR(30) NOT NULL,
+    salary DECIMAL NOT NULL,
+    department_id INT NOT NULL
+);
+
+CREATE TABLE employee (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY, 
+    first_name VARCHAR(30) NOT NULL
+    second_name VARCHAR(30) NOT NULL
+    role_id INT NOT NULL
+    manager_id INT 
 );
 
