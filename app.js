@@ -3,19 +3,110 @@ const cTable = require('console.table');
 const db = require('./db/connection');
 
 const getDepartments = () => {
-    const sql = `SELECT * FROM departments`;
+    const sql = `SELECT department.name FROM department`;
 
     db.query(sql, (err, rows) => {
-    console.table(rows);
+        if(err) {console.log(err.message)};
+        // else
+        console.table(rows);
+        // call initial prompt again after query
+        initialPrompt();
     });
+};
 
-    // call initial prompt again after query
-    initialPrompt();
-}
+const getRoles = () => {
+    const sql = `SELECT role.title FROM role`
+    db.query(sql, (err, row) => {
+        if(err){console.log(err.message)};
+        // else
+        console.table(row);
+        // call initial prompt again after query
+        initialPrompt();
+    });
+};
+
+const getEmployees = () => {
+    const sql = `SELECT employee.first_name, employee.second_name, role.title FROM employee LEFT JOIN role ON employee.role_id = role.id`
+    db.query(sql, (err, row) => {
+        if(err){console.log(err.message)};
+        // else
+        console.table(row);
+        // call initial prompt again after query
+        initialPrompt();
+    });
+};
+
+const addDepartment = () => {
+
+    // prompt for more information
+    inquirer.prompt([
+        {
+            type: 'text',
+            name: 'department_name',
+            message: 'What is the name of the department you want to add?'
+        }
+    ])
+
+    const sql = `INSERT INTO candidates (first_name, last_name, industry_connected)
+  VALUES (?,?,?)`;
+
+    db.query(sql, (err, rows) => {
+        if(err) {console.log(err.message)};
+        // else
+        console.table(rows);
+        // call initial prompt again after query
+        initialPrompt();
+    });
+};
+
+const addRole = () => {
+
+    // prompt for more information
+    inquirer.prompt([
+        {
+            type: 'text',
+            name: 'role_name',
+            message: 'What is the name of the department you want to add?'
+        }
+    ])
+
+    const sql = `SELECT department.name FROM department`;
+
+    db.query(sql, (err, rows) => {
+        if(err) {console.log(err.message)};
+        // else
+        console.table(rows);
+        // call initial prompt again after query
+        initialPrompt();
+    });
+};
+
+const addEmployee = () => {
+
+    // prompt for more information
+    inquirer.prompt([
+        {
+            type: 'text',
+            name: 'first_name',
+            message: 'What is the name of the department you want to add?'
+        }
+    ])
+
+    const sql = `SELECT department.name FROM department`;
+
+    db.query(sql, (err, rows) => {
+        if(err) {console.log(err.message)};
+        // else
+        console.table(rows);
+        // call initial prompt again after query
+        initialPrompt();
+    });
+};
+
 
 const initialPrompt = () => {
-
     inquirer.prompt([ 
+
         {
             type: 'list',
             name: 'request',
@@ -32,10 +123,10 @@ const initialPrompt = () => {
                 getDepartments();
             break;
             case 'view all roles': 
-                console.log('view roles');
+                getRoles();
             break;
             case 'view all employees': 
-                console.log('employess');
+                getEmployees();
             break;
             case 'add a department': 
                 console.log('add dep');
