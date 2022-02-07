@@ -15,7 +15,7 @@ const getDepartments = () => {
 };
 
 const getRoles = () => {
-    const sql = `SELECT role.title, department.name, employee.first_name FROM role LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee ON employee.role_id = role.id`
+    const sql = `SELECT role.title, department.name FROM role LEFT JOIN department ON role.department_id = department.id` //LEFT JOIN employee ON employee.role_id = role.id`
 
     db.query(sql, (err, row) => {
         if(err){console.log(err.message)};
@@ -27,7 +27,7 @@ const getRoles = () => {
 };
 
 const getEmployees = () => {
-    const sql = "SELECT employee.id, employee.first_name, employee.second_name, role.title, role.salary, CONCAT(manager.first_name, ' ', manager.second_name) AS manager FROM employee LEFT JOIN role on employee.role_id = role.id LEFT JOIN employee manager on manager.id = employee.manager_id;";
+    const sql = "SELECT employee.id, employee.first_name, employee.second_name, role.title, department.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.second_name) AS manager FROM employee LEFT JOIN role on employee.role_id = role.id LEFT JOIN department on role.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id";
 
     db.query(sql, (err, row) => {
         if(err){console.log(err.message)};
@@ -78,7 +78,7 @@ const addRole = () => {
         {
             type: 'text',
             name: 'role_department',
-            message: 'In what department is this role?'
+            message: 'What is the department id for this role?'
         }
     ]).then(promptData => {
         const sql = `INSERT INTO role (title, salary, department_id)
@@ -111,13 +111,18 @@ const addEmployee = () => {
     },
     {
         type: 'text',
-        name: 'employees_role',
-        message: 'What is the role for this employee?'
+        name: 'role_id',
+        message: 'What is the role id for this employee?'
+    },
+    {
+        type: 'text',
+        name: 'employee_manager',
+        message: 'What is the manager id for this employee?'
     }
     ]).then(promptData => {
-        const sql = `INSERT INTO employee (first_name, second_name, role_id)
-        VALUES (?, ?, ?)`;
-        const params = [promptData.first_name, promptData.second_name, promptData.role_id]
+        const sql = `INSERT INTO employee (first_name, second_name, role_id, manager_id)
+        VALUES (?, ?, ?, ?)`;
+        const params = [promptData.first_name, promptData.second_name, promptData.role_id, promptData.employee_manager]
         db.query(sql, params, (err, rows) => {
             if(err) {console.log(err.message)};
             // else
@@ -131,31 +136,43 @@ const addEmployee = () => {
 };
 
 const updateEmployeesRole = () => {
-    inquirer.prompt([
-        {
-            type: 'list',
-            name: 'employee_role_change',
-            message: 'What employee do you want change roles?'
-        },
-        {
-            type: 'text',
-            name: 'new_role',
-            message: 'What is the new role id for this employee?'
+    // query for all employees from database
+    const sql = 'SELECT employee.first_name FROM employee';
+    db.query(sql, (err, rows) => {
+        if(err) {console.log(err.message)};
+        // get all employees in datbase and push them into an array for inquirer prompt
+        let employees = [];
+        for (let i = 0; i < rows.length; i++) {
+            employees.push(rows[i].first_name);
         }
-    ]).then(promptData => {
-        const sql = 'UPDATE employee SET role_id = ? WHERE employee.id = ?';
-        const params = [promptData.employee_name, promptData.new_role];
-        db.query(sql, params, (err, rows) => {
-            if(err) {console.log(err.message)};
-            // else
-            console.log(`
-            ${promptData.employee_id} changed roles to ${promptData.new_role_id}.
-            `);
-            // call initial prompt again after query
-            initialPrompt();
-        })
-    })
-}
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'employee_name',
+                message: 'What employee do you want change roles?',
+                // load all employee array
+                choices: employees
+            },
+            {
+                type: 'text',
+                name: 'new_role',
+                message: 'What is the new role id for this employee?'
+            }
+        ]).then(promptData => {
+            const sql = 'UPDATE employee SET role_id = ? WHERE employee.first_name = ?';
+            const params = [promptData.new_role, promptData.employee_name];
+            db.query(sql, params, (err, rows) => {
+                if(err) {console.log(err.message)};
+                // else
+                console.log(`
+                ${promptData.employee_name} changed roles.
+                `);
+                // call initial prompt again after query
+                initialPrompt();
+            });
+        });
+    });
+};
 
 const initialPrompt = () => {
     inquirer.prompt([ 
@@ -166,10 +183,6 @@ const initialPrompt = () => {
             choices: ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update an employee role']
         }
     ]).then(promptData => {
-
-        console.log(`
-        -------------------------------------------------`);
-
         // promptData.request equals the answer from the prompt in a string format
         switch (promptData.request){
             case 'view all departments': 

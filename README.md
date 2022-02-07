@@ -15,6 +15,7 @@ An interactive app that lets you modify an sql database
 https://github.com/realchavezjuan/team-profile-generator
 
 ## Video Walkthrough
+https://watch.screencastify.com/v/PtbyqGentnMvIb3gi6mZ
 
 ## Contribution
 Made by Juan C. Chavez
