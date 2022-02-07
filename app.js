@@ -15,7 +15,8 @@ const getDepartments = () => {
 };
 
 const getRoles = () => {
-    const sql = `SELECT role.title, department.name FROM role LEFT JOIN department ON role.department_id = department.id`
+    const sql = `SELECT role.title, department.name, employee.first_name FROM role LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee ON employee.role_id = role.id`
+
     db.query(sql, (err, row) => {
         if(err){console.log(err.message)};
         // else
@@ -26,7 +27,8 @@ const getRoles = () => {
 };
 
 const getEmployees = () => {
-    const sql = `SELECT employee.first_name, employee.second_name, role.title, role.salary, employee.manager_id FROM employee LEFT JOIN role ON employee.role_id = role.id`
+    const sql = "SELECT employee.id, employee.first_name, employee.second_name, role.title, role.salary, CONCAT(manager.first_name, ' ', manager.second_name) AS manager FROM employee LEFT JOIN role on employee.role_id = role.id LEFT JOIN employee manager on manager.id = employee.manager_id;";
+
     db.query(sql, (err, row) => {
         if(err){console.log(err.message)};
         // else
@@ -61,7 +63,6 @@ const addDepartment = () => {
 };
 
 const addRole = () => {
-
     // prompt for more information
     inquirer.prompt([
         {
@@ -96,7 +97,6 @@ const addRole = () => {
 };
 
 const addEmployee = () => {
-
    // prompt for more information
    inquirer.prompt([
     {
@@ -131,14 +131,30 @@ const addEmployee = () => {
 };
 
 const updateEmployeesRole = () => {
-    const test = ['test1', 'test2'];
-    // inquirer.prompt([
-    //     {
-    //         type: 'list',
-    //         name: 'employee',
-    //         message: 'What employee do you want to change roles?'
-    //     }
-    // ])
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employee_role_change',
+            message: 'What employee do you want change roles?'
+        },
+        {
+            type: 'text',
+            name: 'new_role',
+            message: 'What is the new role id for this employee?'
+        }
+    ]).then(promptData => {
+        const sql = 'UPDATE employee SET role_id = ? WHERE employee.id = ?';
+        const params = [promptData.employee_name, promptData.new_role];
+        db.query(sql, params, (err, rows) => {
+            if(err) {console.log(err.message)};
+            // else
+            console.log(`
+            ${promptData.employee_id} changed roles to ${promptData.new_role_id}.
+            `);
+            // call initial prompt again after query
+            initialPrompt();
+        })
+    })
 }
 
 const initialPrompt = () => {
@@ -147,7 +163,7 @@ const initialPrompt = () => {
             type: 'list',
             name: 'request',
             message: 'What do you want to do?',
-            choices: ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'and update an employee role', 'reset to original seeds file']
+            choices: ['view all departments', 'view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update an employee role']
         }
     ]).then(promptData => {
 
@@ -174,8 +190,8 @@ const initialPrompt = () => {
             case 'add an employee': 
                 addEmployee();
             break;
-            case 'and update an employee role': 
-                console.log('update');
+            case 'update an employee role': 
+                updateEmployeesRole();
             break;
         }
     });
